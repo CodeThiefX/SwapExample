@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OneSwap</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body, html {
+      height: 100%;
+      background: linear-gradient(135deg, #330066, #000);
+      color: white;
+      position: relative;
+    }
+
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+    }
+
+    /* Custom styles */
+    #connectWalletBtn {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      z-index: 999;
+      background: linear-gradient(135deg, #5500ff, #a51eff);
+      border: 1px solid #fff;
+      color: white;
+    }
+
+    .dropdown-menu {
+      top: 50px; /* Adjust this value as needed to position the dropdown properly */
+      background-color: #330066;
+    }
+
+    .wallet-option {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+      color: white;
+    }
+
+    .wallet-option img {
+      width: 40px;
+      height: 40px;
+      margin-right: 10px;
+    }
+
+    /* Card styles */
+    .card {
+      background: linear-gradient(135deg, #5500ff, #a51eff);
+      border: 1px solid #fff;
+    }
+
+    .card label {
+      color: white;
+    }
+
+    .card input[type="text"],
+    .card button {
+      background-color: #fff;
+      color: #330066;
+    }
+
+    .card button:hover {
+      background-color: #a51eff;
+      color: white;
+    }
+
+    /* Navbar styles */
+    .navbar {
+      background-color: #330066;
+    }
+
+    .navbar-brand,
+    .navbar-toggler-icon,
+    .navbar .nav-item button {
+      color: white;
+    }
+
+    /* Wallet modal styles */
+    .modal-content {
+      background-color: #330066;
+      color: white;
+    }
+
+    .navbar-color {
+      background-color: #330066;
+      color: white;
+    }
+
+    .modal-header {
+      border-bottom: 1px solid #fff;
+      color: white;
+    }
+
+    .modal-title {
+      color: white;
+    }
+
+    .wallet-option span {
+      color: white;
+    }
+
+    .wallet-option img {
+      filter: invert(1) brightness(2); /* Adjust the filter as needed to make the logo visible on the dark background */
+    }
+
+    /* Adjust button positioning on small screens */
+    @media (max-width: 767px) {
+      #connectWalletBtn {
+        top: 70px; /* Move the button down to avoid overlapping the hamburger menu */
+        right: 20px; /* Adjust the horizontal position */
+      }
+    }
+    .navbar-brand:hover{
+        color: white;
+    }
+
+    .stars-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+    #stars {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+  </style>
+</head>
+<body>
+    <div class="bg-star-bg">
+        <canvas id="stars"></canvas>
+    </div>
+  <nav class="navbar navbar-expand-lg navbar-color">
+    <div class="container">
+      <a class="navbar-brand" href="#">OneSwap</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <button id="connectWalletBtn" class="btn btn-primary" style="border:0px;">Connect Wallet</button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <div class="container" >
+    <form class="card p-4" style="border:0px;">
+      <h3 class="mb-4 text-white text-center">Swap</h3>
+      <div class="mb-3">
+        <label for="inputFrom">From</label>
+        <div style="display:flex;flex-wrap: wrap;">
+            <input type="text" id="inputFrom" class="form-control" style="width:44%;margin:5px;" placeholder="Enter amount">
+            <select id="fromCurrency" class="form-select" style="width:44%;margin:5px;">
+                <option value="ethereum">Ethereum</option>
+                <option value="bitcoin">Bitcoin</option>
+                <option value="binance">Binance</option>
+                <option value="litecoin">Litecoin</option>
+            </select>
+        </div>
+      </div>
+      <div class="mb-3">
+        <label for="inputTo">To</label>
+        <div style="display:flex;flex-wrap: wrap;">
+            <input type="text" id="inputTo" class="form-control" style="width:44%;margin:5px;" placeholder="Enter amount">
+            <select id="toCurrency" class="form-select" style="width:44%;margin:5px;">
+                <option value="ethereum">Ethereum</option>
+                <option value="bitcoin">Bitcoin</option>
+                <option value="binance">Binance</option>
+                <option value="litecoin">Litecoin</option>
+            </select>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary" style="background-color: #a51eff;color:white;border:0px;">Swap</button>
+    </form>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal" id="walletModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Connect Wallet</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="closeWalletModal">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="wallet-option">
+            <img src="metamask_logo.png" alt="Metamask Logo">
+            <span>Connect using Metamask</span>
+          </div>
+          <div class="wallet-option">
+            <img src="trustwallet_logo.png" alt="Trust Wallet Logo">
+            <span>Connect using Trust Wallet</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const connectWalletBtn = document.getElementById('connectWalletBtn');
+    const walletModal = new bootstrap.Modal(document.getElementById('walletModal'));
+    const closeWalletModalBtn = document.getElementById('closeWalletModal');
+
+    connectWalletBtn.addEventListener('click', () => {
+      walletModal.show();
+
+    closeWalletModalBtn.addEventListener('click', () => {
+      walletModal.hide();
+    });
+      // Add your wallet connection code here (connecting with Metamask/Trust Wallet)
+      // For this simplified version, it will just show the modal without actual connection functionality.
+    });
+  </script>
+  <script>
+    const canvas = document.getElementById('stars')
+    const ctx = canvas.getContext('2d')
+
+    // Set the canvas size to match the container
+    canvas.width = canvas.offsetWidth
+    canvas.height = canvas.offsetHeight
+
+    // Define the number of stars and their properties
+    const numStars = 150
+    const starRadius = 1
+    const starColor = 'white'
+
+    // Create an array to store the stars
+    const stars = []
+
+    // Function to create a new star
+    function createStar() {
+    const x = Math.random() * canvas.width
+    const y = Math.random() * canvas.height
+    const vx = (Math.random() - 0.5) * 0.1
+    const vy = (Math.random() - 0.5) * 0.1
+
+    stars.push({ x, y, vx, vy })
+    }
+
+    // Function to update the position of a star
+    function updateStar(star) {
+    star.x += star.vx
+    star.y += star.vy
+
+    // If the star goes off the canvas, reset its position
+    if (star.x < 0 || star.x > canvas.width || star.y < 0 || star.y > canvas.height) {
+        star.x = Math.random() * canvas.width
+        star.y = Math.random() * canvas.height
+    }
+    }
+
+    // Function to draw a star on the canvas
+    function drawStar(star) {
+    ctx.beginPath()
+    ctx.arc(star.x, star.y, starRadius, 0, Math.PI * 2)
+    ctx.fillStyle = starColor
+    ctx.fill()
+    }
+
+    // Create the initial stars
+    for (let i = 0; i < numStars; i++) {
+    createStar()
+    }
+
+    // Animation loop
+    function animate() {
+    // Clear the canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+    // Update and draw each star
+    for (const star of stars) {
+        updateStar(star)
+        drawStar(star)
+    }
+
+    // Request the next frame of the animation
+    requestAnimationFrame(animate)
+    }
+
+    // Start the animation
+    animate()
+
+  </script>
+</body>
+</html>
